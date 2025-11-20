@@ -103,3 +103,58 @@ private JTable buildTable() {
 
     return studentTable;
 }
+
+private void loadDataFromDatabase() {
+    tableModel.setRowCount(0);
+
+    DatabaseHelper.createTableIfNotExists();
+    DatabaseHelper.insertSampleDataIfEmpty();
+
+    List<Object[]> data = DatabaseHelper.getAllStudents();
+    for (Object[] row : data) tableModel.addRow(row);
+
+    exportButton.setEnabled(true);
+    statusLabel.setText("Loaded " + data.size() + " rows.");
+}
+
+private void exportTableToPDF() {
+
+    if (tableModel.getRowCount() == 0) {
+        JOptionPane.showMessageDialog(mainFrame, "Table is empty!");
+        return;
+    }
+
+    JFileChooser chooser = new JFileChooser();
+    chooser.setFileFilter(new FileNameExtensionFilter("PDF", "pdf"));
+    if (chooser.showSaveDialog(mainFrame) != JFileChooser.APPROVE_OPTION) return;
+
+    File file = chooser.getSelectedFile();
+    if (!file.getName().endsWith(".pdf")) {
+        file = new File(file.getAbsolutePath() + ".pdf");
+    }
+
+    Document document = new Document(PageSize.A4.rotate());
+
+    try {
+        PdfWriter.getInstance(document, new java.io.FileOutputStream(file));
+        document.open();
+
+        // TITLE FONT (iText)
+        Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, BaseColor.BLACK);
+
+        Paragraph title = new Paragraph(
+                "FACULTY OF SCIENCE AND TECHNOLOGY\n" +
+                        "ADVANCED OBJECT-ORIENTED PROGRAMMING CLASS ACTIVITY\n" +
+                        "Advanced Object Oriented Programming\n",
+                titleFont
+        );
+        title.setAlignment(Element.ALIGN_CENTER);
+        document.add(title);
+
+        // TIMESTAMP
+        Paragraph time = new Paragraph(
+                "Generated: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                FontFactory.getFont(FontFactory.HELVETICA, 10)
+        );
+        time.setAlignment(Element.ALIGN_RIGHT);
+        document.add(time);
