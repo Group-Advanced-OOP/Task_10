@@ -68,3 +68,38 @@ private JButton buildLoadButton() {
     btn.addActionListener(e -> loadDataFromDatabase());
     return btn;
 }
+
+private JButton buildExportButton() {
+    JButton btn = new JButton("Export to PDF");
+    btn.setFont(new java.awt.Font("Comic Sans MS", java.awt.Font.BOLD, 14));
+    btn.setBackground(new Color(200, 0, 0));
+    btn.setForeground(Color.WHITE);
+    btn.setFocusPainted(false);
+    btn.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+    btn.addActionListener(e -> exportTableToPDF());
+    return btn;
+}
+
+private JTable buildTable() {
+    tableModel = new DefaultTableModel(
+            new String[]{"ID", "Student No", "Full Name", "Nationality", "Phone No"},
+            0
+    );
+
+    studentTable = new JTable(tableModel);
+    studentTable.setFont(new java.awt.Font("Comic Sans MS", java.awt.Font.PLAIN, 13));
+    studentTable.setRowHeight(25);
+
+    JTableHeader header = studentTable.getTableHeader();
+    header.setBackground(new Color(200, 0, 0));
+    header.setForeground(Color.WHITE);
+    header.setFont(new java.awt.Font("Comic Sans MS", java.awt.Font.BOLD, 15));
+
+    DefaultTableCellRenderer center = new DefaultTableCellRenderer();
+    center.setHorizontalAlignment(SwingConstants.CENTER);
+    for (int i = 0; i < studentTable.getColumnCount(); i++) {
+        studentTable.getColumnModel().getColumn(i).setCellRenderer(center);
+    }
+
+    return studentTable;
+}
