@@ -158,3 +158,41 @@ private void exportTableToPDF() {
         );
         time.setAlignment(Element.ALIGN_RIGHT);
         document.add(time);
+
+        PdfPTable pdfTable = new PdfPTable(tableModel.getColumnCount());
+        pdfTable.setWidthPercentage(100);
+
+        Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 11, BaseColor.WHITE);
+        BaseColor blue = new BaseColor(33, 150, 243);
+
+        // HEADERS
+        for (int i = 0; i < tableModel.getColumnCount(); i++) {
+            PdfPCell cell = new PdfPCell(new Phrase(tableModel.getColumnName(i), headerFont));
+            cell.setBackgroundColor(blue);
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            pdfTable.addCell(cell);
+        }
+
+        // BODY
+        Font cellFont = FontFactory.getFont(FontFactory.HELVETICA, 10);
+
+        for (int r = 0; r < tableModel.getRowCount(); r++) {
+            for (int c = 0; c < tableModel.getColumnCount(); c++) {
+                Object value = tableModel.getValueAt(r, c);
+                PdfPCell cell = new PdfPCell(new Phrase(value.toString(), cellFont));
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                pdfTable.addCell(cell);
+            }
+        }
+
+        document.add(pdfTable);
+        JOptionPane.showMessageDialog(mainFrame, "PDF saved successfully!");
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(mainFrame, "Error: " + e.getMessage());
+    } finally {
+        document.close();
+    }
+}
+}
