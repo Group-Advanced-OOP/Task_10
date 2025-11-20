@@ -58,3 +58,29 @@ public class DatabaseHelper {
             e.printStackTrace();
         }
     }
+
+    public static List<Object[]> getAllStudents() {
+        List<Object[]> students = new ArrayList<>();
+        String sql = "SELECT id, student_no, full_name, nationality, phone_no FROM " + DB_TABLE + " ORDER BY id";
+
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                students.add(new Object[]{
+                        rs.getInt("id"),
+                        rs.getString("student_no"),
+                        rs.getString("full_name"),
+                        rs.getString("nationality"),
+                        rs.getString("phone_no")
+                });
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return students;
+    }
+}
