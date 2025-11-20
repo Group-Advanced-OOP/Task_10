@@ -68,3 +68,93 @@ private JButton buildLoadButton() {
     btn.addActionListener(e -> loadDataFromDatabase());
     return btn;
 }
+
+private JButton buildExportButton() {
+    JButton btn = new JButton("Export to PDF");
+    btn.setFont(new java.awt.Font("Comic Sans MS", java.awt.Font.BOLD, 14));
+    btn.setBackground(new Color(200, 0, 0));
+    btn.setForeground(Color.WHITE);
+    btn.setFocusPainted(false);
+    btn.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+    btn.addActionListener(e -> exportTableToPDF());
+    return btn;
+}
+
+private JTable buildTable() {
+    tableModel = new DefaultTableModel(
+            new String[]{"ID", "Student No", "Full Name", "Nationality", "Phone No"},
+            0
+    );
+
+    studentTable = new JTable(tableModel);
+    studentTable.setFont(new java.awt.Font("Comic Sans MS", java.awt.Font.PLAIN, 13));
+    studentTable.setRowHeight(25);
+
+    JTableHeader header = studentTable.getTableHeader();
+    header.setBackground(new Color(200, 0, 0));
+    header.setForeground(Color.WHITE);
+    header.setFont(new java.awt.Font("Comic Sans MS", java.awt.Font.BOLD, 15));
+
+    DefaultTableCellRenderer center = new DefaultTableCellRenderer();
+    center.setHorizontalAlignment(SwingConstants.CENTER);
+    for (int i = 0; i < studentTable.getColumnCount(); i++) {
+        studentTable.getColumnModel().getColumn(i).setCellRenderer(center);
+    }
+
+    return studentTable;
+}
+
+private void loadDataFromDatabase() {
+    tableModel.setRowCount(0);
+
+    DatabaseHelper.createTableIfNotExists();
+    DatabaseHelper.insertSampleDataIfEmpty();
+
+    List<Object[]> data = DatabaseHelper.getAllStudents();
+    for (Object[] row : data) tableModel.addRow(row);
+
+    exportButton.setEnabled(true);
+    statusLabel.setText("Loaded " + data.size() + " rows.");
+}
+
+private void exportTableToPDF() {
+
+    if (tableModel.getRowCount() == 0) {
+        JOptionPane.showMessageDialog(mainFrame, "Table is empty!");
+        return;
+    }
+
+    JFileChooser chooser = new JFileChooser();
+    chooser.setFileFilter(new FileNameExtensionFilter("PDF", "pdf"));
+    if (chooser.showSaveDialog(mainFrame) != JFileChooser.APPROVE_OPTION) return;
+
+    File file = chooser.getSelectedFile();
+    if (!file.getName().endsWith(".pdf")) {
+        file = new File(file.getAbsolutePath() + ".pdf");
+    }
+
+    Document document = new Document(PageSize.A4.rotate());
+
+    try {
+        PdfWriter.getInstance(document, new java.io.FileOutputStream(file));
+        document.open();
+
+        // TITLE FONT (iText)
+        Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, BaseColor.BLACK);
+
+        Paragraph title = new Paragraph(
+                "FACULTY OF SCIENCE AND TECHNOLOGY\n" +
+                        "ADVANCED OBJECT-ORIENTED PROGRAMMING CLASS ACTIVITY\n" +
+                        "Advanced Object Oriented Programming\n",
+                titleFont
+        );
+        title.setAlignment(Element.ALIGN_CENTER);
+        document.add(title);
+
+        // TIMESTAMP
+        Paragraph time = new Paragraph(
+                "Generated: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                FontFactory.getFont(FontFactory.HELVETICA, 10)
+        );
+        time.setAlignment(Element.ALIGN_RIGHT);
+        document.add(time);
