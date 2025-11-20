@@ -7,3 +7,6 @@ public class Main {
         } catch (ClassNotFoundException e) {
             System.err.println("SQLite JDBC not found.");
         }
+        SwingUtilities.invokeLater(() -> new LMSReportGenerator());
+    }
+}
